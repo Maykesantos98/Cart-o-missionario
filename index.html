@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Cartão Missionário (Impressão Corrigida)</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&family=EB+Garamond:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+<style>
+        /* (Todos os estilos :root, body, .editor, .card e TEMAS permanecem os mesmos...) */
+        :root {
+            --cor-azul-vibrante: #007bff;
+            --cor-azul-escuro-chamativo: #004d99;
+            --cor-texto-principal: #2c3e50;
+            --cor-texto-secundario: #6c757d;
+            --cor-borda-suave: #e0e0e0;
+            --cor-fundo-coluna-foto: #e6f2ff;
+            --fonte-titulo-moderno: 'Montserrat', sans-serif;
+            --fonte-corpo-moderno: 'Open Sans', sans-serif;
+            --cor-destaque: #ffc107;
+            --fonte-titulo-classico: 'EB Garamond', serif;
+            --cor-texto-classico: #333333;
+            --cor-borda-classica: #999999;
+            --cor-fundo-celestial: #0c1c3b;
+            --cor-fundo-celestial-grad: #1a3a70;
+            --cor-texto-celestial-claro: #eee;
+            --cor-texto-celestial-medio: #aaa;
+        }
+        
+        body {
+            font-family: var(--fonte-corpo-moderno); 
+            background-color: #f5f7fa; display: flex;
+            flex-direction: column; align-items: center;
+            justify-content: flex-start; padding: 20px; 
+            color: var(--cor-texto-principal); gap: 30px;
+        }
+        
+        .editor {
+            background-color: #ffffff; padding: 25px; border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); width: 400px;
+        }
+        .editor h2 {
+            font-family: var(--fonte-titulo-moderno); font-weight: 700; color: var(--cor-azul-escuro-chamativo);
+            border-bottom: 2px solid var(--cor-borda-suave); padding-bottom: 10px; margin-top: 0;
+        }
+        .editor .campo { margin-bottom: 15px; }
+        .editor label {
+            display: block; font-weight: 600; font-size: 14px;
+            color: var(--cor-texto-principal); margin-bottom: 5px;
+        }
+        .editor input[type="text"],
+        .editor input[type="number"],
+        .editor input[type="date"],
+        .editor select {
+            width: 100%; padding: 10px; border: 1px solid var(--cor-borda-suave);
+            border-radius: 6px; font-size: 15px;
+            font-family: var(--fonte-corpo-moderno);
+            box-sizing: border-box; 
+        }
+        .campo-medidas { display: flex; gap: 10px; align-items: center; }
+        .campo-medidas .sub-campo { flex: 1; }
+        .campo-medidas span { font-size: 20px; font-weight: 600; color: var(--cor-texto-secundario); padding-top: 15px; }
+        .editor input[type="file"] { font-size: 14px; width: 100%; }
+
+        .botoes-acao { display: flex; gap: 10px; margin-top: 20px; }
+        #btnBaixar, #btnImprimir {
+            flex: 1; padding: 12px; font-size: 16px; font-weight: 600;
+            cursor: pointer; border: none; border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        #btnBaixar { color: #ffffff; background-color: var(--cor-azul-vibrante); }
+        #btnImprimir { color: var(--cor-texto-principal); background-color: #f0f0f0; }
+        #btnBaixar:hover { background-color: var(--cor-azul-escuro-chamativo); }
+        #btnImprimir:hover { background-color: #ddd; }
+        #btnBaixar:disabled, #btnImprimir:disabled { background-color: #aaa; cursor: wait; }
+
+        /* (ESTILOS BASE DO CARTÃO) */
+        .card {
+            background-color: #ffffff;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); 
+            border-radius: 12px;
+            overflow: hidden; position: relative;
+            transform-origin: top left;
+            border: none;
+        }
+        .card-body { display: flex; flex-direction: row; width: 100%; height: 100%; }
+        .info-column { order: 1; }
+        .photo-column { order: 2; }
+        .info-column { flex-basis: 60%; padding: 30px; display: flex; flex-direction: column; justify-content: center; }
+        .photo-column { flex-basis: 40%; padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .details { border-top: 1px solid var(--cor-borda-suave); padding-top: 20px; margin-top: 20px; }
+        .details p { margin: 10px 0; }
+        .footer { border-top: 1px solid var(--cor-borda-suave); padding-top: 20px; margin-top: 25px; }
+        .mission::after { display: none; }
+        .incentive-message { display: none; }
+        
+        /* (TODOS OS 5 TEMAS CSS VÊM AQUI - idênticos ao código anterior) */
+        
+        /* TEMA 1: MODERNO */
+        .card.theme-moderno .photo-column { background-color: var(--cor-fundo-coluna-foto); background-image: linear-gradient(135deg, var(--cor-fundo-coluna-foto) 0%, #d8eaff 100%); border-left: 2px solid var(--cor-borda-suave); }
+        .card.theme-moderno #out-foto-container { width: 80%; padding-bottom: 80%; height: 0; border-radius: 50%; border: 6px solid #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 25px; z-index: 2; background-image: url('foto_missionario.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; }
+        .card.theme-moderno .incentive-message { display: block; position: absolute; bottom: 20px; left: 10px; right: 10px; font-family: var(--fonte-titulo-moderno); font-size: 16px; font-weight: 700; color: var(--cor-azul-escuro-chamativo); text-align: center; line-height: 1.3; }
+        .card.theme-moderno .stake { font-size: 14px; color: var(--cor-texto-secundario); font-family: var(--fonte-corpo-moderno); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; text-align: left; }
+        .card.theme-moderno .main-name { font-family: var(--fonte-titulo-moderno); font-size: 38px; font-weight: 700; text-align: left; margin: 4px 0; color: var(--cor-azul-vibrante); }
+        .card.theme-moderno .mission { font-family: var(--fonte-titulo-moderno); font-size: 22px; font-weight: 600; color: var(--cor-texto-principal); text-align: left; margin-bottom: 20px; position: relative; padding-bottom: 10px; }
+        .card.theme-moderno .mission::after { display: block; content: ''; position: absolute; left: 0; bottom: 0; width: 60px; height: 3px; background-color: var(--cor-destaque); border-radius: 2px; }
+        .card.theme-moderno .details p { font-size: 16px; line-height: 1.7; font-family: var(--fonte-corpo-moderno); color: var(--cor-texto-principal); }
+        .card.theme-moderno .details strong { color: var(--cor-azul-escuro-chamativo); font-weight: 700; }
+        .card.theme-moderno .footer p { font-size: 11px; color: var(--cor-texto-secundario); line-height: 1.5; text-transform: uppercase; letter-spacing: 0.5px; text-align: left; }
+
+        /* TEMA 2: CLÁSSICO */
+        .card.theme-classico { box-shadow: none; border: 1px solid var(--cor-borda-classica); border-radius: 4px; }
+        .card.theme-classico .photo-column { background: #f9f9f9; border-left: 1px solid var(--cor-borda-suave); }
+        .card.theme-classico #out-foto-container { width: 80%; padding-bottom: 80%; height: 0; border-radius: 10px; border: 4px solid #ffffff; box-shadow: 0 2px 5px rgba(0,0,0,0.15); margin-bottom: 25px; z-index: 2; background-image: url('foto_missionario.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; }
+        .card.theme-classico .info-column { text-align: center; }
+        .card.theme-classico .stake { font-size: 15px; color: var(--cor-texto-secundario); font-family: var(--fonte-titulo-classico); font-weight: 400; }
+        .card.theme-classico .main-name { font-family: var(--fonte-titulo-classico); font-size: 42px; font-weight: 700; margin: 8px 0; color: var(--cor-texto-classico); }
+        .card.theme-classico .mission { font-family: var(--fonte-titulo-classico); font-size: 24px; font-weight: 400; color: var(--cor-texto-secundario); margin-bottom: 20px; }
+        .card.theme-classico .details p { font-size: 16px; line-height: 1.6; font-family: var(--fonte-titulo-classico); color: var(--cor-texto-classico); text-align: left; }
+        .card.theme-classico .details strong { color: #000; font-weight: 700; }
+        .card.theme-classico .footer p { font-size: 12px; color: var(--cor-texto-secundario); font-family: var(--fonte-titulo-classico); text-transform: none; text-align: center; }
+
+        /* TEMA 3: MINIMALISTA */
+        .card.theme-minimalista { border: 1px solid #ddd; box-shadow: none; border-radius: 4px; }
+        .card.theme-minimalista .photo-column { background: #ffffff; border-left: 1px solid #eee; }
+        .card.theme-minimalista #out-foto-container { width: 80%; padding-bottom: 80%; height: 0; border-radius: 50%; border: 1px solid #ccc; box-shadow: none; margin-bottom: 0; background-image: url('foto_missionario.jpg'); background-size: cover; background-position: center; }
+        .card.theme-minimalista .info-column { text-align: left; }
+        .card.theme-minimalista .stake { font-size: 12px; color: var(--cor-texto-secundario); font-family: var(--fonte-corpo-moderno); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .card.theme-minimalista .main-name { font-family: var(--fonte-corpo-moderno); font-size: 34px; font-weight: 700; margin: 4px 0; color: #000; }
+        .card.theme-minimalista .mission { font-family: var(--fonte-corpo-moderno); font-size: 20px; font-weight: 400; color: #333; margin-bottom: 20px; }
+        .card.theme-minimalista .details p { font-size: 15px; line-height: 1.6; font-family: var(--fonte-corpo-moderno); color: #333; }
+        .card.theme-minimalista .details strong { color: #000; font-weight: 600; }
+        .card.theme-minimalista .footer p { font-size: 10px; color: #999; text-transform: uppercase; text-align: left; }
+
+        /* TEMA 4: FOCO NA FOTO (Ajustado) */
+        .card.theme-foco-foto .card-body { flex-direction: row-reverse; align-items: stretch; }
+        .card.theme-foco-foto .info-column { flex-basis: 45%; padding: 25px; text-align: left; }
+        .card.theme-foco-foto .photo-column { flex-basis: 55%; padding: 0; border-left: none; border-right: 2px solid var(--cor-borda-suave); background: #000; display: flex; align-items: center; justify-content: center; position: relative; }
+        .card.theme-foco-foto #out-foto-container { width: 100%; height: 100%; object-fit: cover; border-radius: 0; border: none; box-shadow: none; margin-bottom: 0; background-image: url('foto_missionario.jpg'); background-size: cover; background-position: center; }
+        .card.theme-foco-foto .incentive-message { display: block; position: absolute; bottom: 15px; left: 15px; right: 15px; font-family: var(--fonte-titulo-moderno); font-size: 18px; font-weight: 700; color: #ffffff; text-shadow: 0 1px 3px rgba(0,0,0,0.5); text-align: center; line-height: 1.2; }
+        .card.theme-foco-foto .stake { font-size: 14px; color: var(--cor-texto-secundario); font-family: var(--fonte-corpo-moderno); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .card.theme-foco-foto .main-name { font-size: 32px; color: var(--cor-azul-vibrante); margin: 4px 0; font-family: var(--fonte-titulo-moderno); font-weight: 700; }
+        .card.theme-foco-foto .mission { font-size: 20px; color: var(--cor-texto-principal); margin-bottom: 15px; font-family: var(--fonte-titulo-moderno); font-weight: 600; }
+        .card.theme-foco-foto .details { border-top-color: var(--cor-borda-suave); padding-top: 15px; margin-top: 15px; }
+        .card.theme-foco-foto .details p { font-size: 15px; line-height: 1.6; color: var(--cor-texto-principal); font-family: var(--fonte-corpo-moderno); }
+        .card.theme-foco-foto .details strong { color: var(--cor-azul-escuro-chamativo); font-weight: 700; }
+        .card.theme-foco-foto .footer { border-top-color: var(--cor-borda-suave); padding-top: 15px; margin-top: 20px; }
+        .card.theme-foco-foto .footer p { font-size: 10px; color: var(--cor-texto-secundario); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* TEMA 5: CELESTIAL (ESCURO) */
+        .card.theme-celestial { background-color: var(--cor-fundo-celestial); background-image: linear-gradient(135deg, var(--cor-fundo-celestial) 0%, var(--cor-fundo-celestial-grad) 100%); border: 1px solid var(--cor-fundo-celestial-grad); }
+        .card.theme-celestial .info-column { order: 2; text-align: left; }
+        .card.theme-celestial .photo-column { order: 1; background: transparent; border-left: none; border-right: 1px solid var(--cor-fundo-celestial-grad); }
+        .card.theme-celestial #out-foto-container { width: 80%; padding-bottom: 80%; height: 0; border-radius: 50%; border: 4px solid var(--cor-destaque); box-shadow: 0 0 15px rgba(255, 193, 7, 0.3); background-image: url('foto_missionario.jpg'); background-size: cover; background-position: center; }
+        .card.theme-celestial .incentive-message { display: block; font-family: var(--fonte-titulo-classico); font-size: 16px; font-weight: 400; color: #ffffff; text-align: center; line-height: 1.3; position: relative; bottom: auto; margin-top: 20px; }
+        .card.theme-celestial .stake { font-size: 14px; color: var(--cor-texto-celestial-medio); font-family: var(--fonte-corpo-moderno); font-weight: 400; text-transform: uppercase; letter-spacing: 1px; }
+        .card.theme-celestial .main-name { font-family: var(--fonte-titulo-classico); font-size: 38px; font-weight: 700; margin: 4px 0; color: var(--cor-destaque); }
+        .card.theme-celestial .mission { font-family: var(--fonte-titulo-classico); font-size: 22px; font-weight: 400; color: #ffffff; margin-bottom: 20px; }
+        .card.theme-celestial .details { border-top: 1px solid var(--cor-fundo-celestial-grad); }
+        .card.theme-celestial .details p { font-size: 16px; font-family: var(--fonte-corpo-moderno); color: var(--cor-texto-celestial-claro); }
+        .card.theme-celestial .details strong { color: #ffffff; font-weight: 600; }
+        .card.theme-celestial .footer { border-top: 1px solid var(--cor-fundo-celestial-grad); }
+        .card.theme-celestial .footer p { font-size: 11px; color: var(--cor-texto-celestial-medio); text-transform: uppercase; }
+
+        /* (REGRAS DE LAYOUT VERTICAL) */
+        .card.vertical .card-body { flex-direction: column; }
+        .card.vertical .info-column { order: 2; flex-basis: auto; width: 100%; padding-top: 20px; }
+        .card.vertical .photo-column { order: 1; flex-basis: auto; width: 100%; border-left: none; border-right: none; border-bottom: 2px solid var(--cor-borda-suave); height: auto; }
+        .card.vertical #out-foto-container { width: 200px; padding-bottom: 0; height: 200px; }
+        .card.vertical.theme-classico #out-foto-container { border-radius: 10px; }
+        .card.vertical.theme-foco-foto .card-body { flex-direction: column; }
+        .card.vertical.theme-foco-foto .photo-column { border-bottom: 2px solid var(--cor-borda-suave); }
+        .card.vertical.theme-foco-foto #out-foto-container { width: 80%; padding-bottom: 0; height: 250px; object-fit: cover; }
+        .card.vertical.theme-celestial .photo-column { border-right: none; border-bottom: 1px solid var(--cor-fundo-celestial-grad); }
+        .card.vertical .incentive-message { position: relative; bottom: auto; padding: 0; margin-top: 10px; }
+        .card.vertical .main-name { font-size: 34px; }
+        .card.vertical .mission { font-size: 20px; }
+        
+        /* ---------------------------------------------------
+           /* ESTILOS DE IMPRESSÃO (CORRIGIDO)
+           ---------------------------------------------------
+        */
+        @media print {
+            /* --- CORREÇÃO 1: Definir a página --- */
+            @page {
+                size: auto;  /* O utilizador escolhe Retrato/Paisagem */
+                margin: 0;   /* Remove margens, headers e footers */
+            }
+
+            /* --- CORREÇÃO 2: Esconder TUDO exceto o cartão --- */
+            body {
+                background: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* Esconde o editor e botões explicitamente */
+            .editor {
+                display: none !important;
+            }
+
+            /* Esconde tudo no body POR PADRÃO */
+            body * {
+                visibility: hidden !important;
+            }
+            
+            /* Torna o cartão e seus filhos visíveis */
+            .card, .card * {
+                visibility: visible !important;
+            }
+            
+            /* --- CORREÇÃO 3: Garantir que o cartão caiba em UMA PÁGINA --- */
+            .card {
+                /* Força a impressão de cores e imagens de fundo */
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                
+                /* Remove estilos de ecrã */
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border-radius: 0 !important;
+
+                /* A LÓGICA PARA CABER NA PÁGINA:
+                  Isto força o cartão a encolher para caber na página,
+                  mantendo a sua proporção.
+                */
+                height: 100vh !important; /* Tenta ocupar 100% da altura da página */
+                width: auto !important;    /* Deixa a largura ser automática (baseada na proporção) */
+                max-width: 100vw !important; /* Se a largura ficar muito grande, limita-a */
+            }
+
+            /* Garante que o fundo da foto também é impresso */
+            #out-foto-container, .photo-column, .info-column, .card-body, .card {
+                 -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card" id="cartaoParaBaixar">
+        <div class="card-body">
+            <div class="info-column">
+                <p class="stake"><span id="out-estaca">Estaca São Miguel Paulista</span></p>
+                <h1 class="main-name"><span id="out-titulo">ELDER SANTOS</span></h1>
+                <p class="mission"><span id="out-missao">Missão Brasil Recife Sul</span></p>
+                <div class="details">
+                    <p><strong>Nome:</strong> <span id="out-nome">Mayke Costa Santos</span></p>
+                    <p><strong>Ala:</strong> <span id="out-ala">Limoeiro</span></p>
+                    <p><strong>Email:</strong> <span id="out-email">mayke.santos@email.com</span></p>
+                    <p><strong>Início:</strong> <span id="out-inicio"></span></p>
+                    <p><strong>Previsão de Término:</strong> <span id="out-termino"></span></p>
+                </div>
+                <div class="footer">
+                    <p>Sirva com Coragem. Edifique o Reino.</p> 
+                </div>
+            </div>
+            <div class="photo-column">
+                <div id="out-foto-container"></div>
+                <p class="incentive-message">
+                    "Compartilhe a luz. Mude o mundo. Sirva uma missão."
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="editor">
+        <h2>Editor do Cartão</h2>
+
+        <div class="campo">
+            <label for="in-largura">Largura (em px):</label>
+            <input type="number" id="in-largura" value="800">
+        </div>
+        <div class="campo">
+            <label>Proporção (Formato):</label>
+            <div class="campo-medidas">
+                <div class="sub-campo"><input type="number" id="in-ratio-w" value="4"></div>
+                <span>x</span>
+                <div class="sub-campo"><input type="number" id="in-ratio-h" value="3"></div>
+            </div>
+        </div>
+
+        <div class="campo">
+            <label for="in-design">Design:</label>
+            <select id="in-design">
+                <option value="theme-moderno">Moderno Vibrante</option>
+                <option value="theme-classico">Clássico Formal</option>
+                <option value="theme-minimalista">Minimalista</option>
+                <option value="theme-foco-foto">Foco na Foto</option>
+                <option value="theme-celestial">Celestial (Escuro)</option>
+            </select>
+        </div>
+        
+        <hr style="border:0; border-top:1px solid #eee; margin: 20px 0;">
+
+        <div class="campo">
+            <label for="in-estaca">Estaca:</label>
+            <input type="text" id="in-estaca" value="Estaca São Miguel Paulista">
+        </div>
+        <div class="campo">
+            <label for="in-titulo">Título (ex: ELDER SANTOS):</label>
+            <input type="text" id="in-titulo" value="ELDER SANTOS">
+        </div>
+        <div class="campo">
+            <label for="in-missao">Missão:</label>
+            <input type="text" id="in-missao" value="Missão Brasil Recife Sul">
+        </div>
+        <div class="campo">
+            <label for="in-nome">Nome Completo:</label>
+            <input type="text" id="in-nome" value="Mayke Costa Santos">
+        </div>
+        <div class="campo">
+            <label for="in-ala">Ala:</label>
+            <input type="text" id="in-ala" value="Limoeiro">
+        </div>
+        <div class="campo">
+            <label for="in-email">Email:</label>
+            <input type="text" id="in-email" value="mayke.santos@email.com">
+        </div>
+        <div class="campo">
+            <label for="in-inicio">Início:</label>
+            <input type="date" id="in-inicio" value="2022-09-07">
+        </div>
+        <div class="campo">
+            <label for="in-termino">Previsão de Término:</label>
+            <input type="date" id="in-termino" value="2024-10-27">
+        </div>
+        <div class="campo">
+            <label for="in-foto">Mudar Foto:</label>
+            <input type="file" id="in-foto" accept="image/*">
+        </div>
+
+        <div class="botoes-acao">
+            <button id="btnImprimir">Imprimir</button>
+            <button id="btnBaixar">Baixar como PNG</button>
+        </div>
+    </div>
+
+    
+    <script>
+        const cartao = document.getElementById('cartaoParaBaixar');
+
+        // --- Ligar inputs de TEXTO ---
+        function ligarInput(inputId, outputId) {
+            const input = document.getElementById(inputId);
+            const output = document.getElementById(outputId);
+            input.addEventListener('input', () => { output.textContent = input.value; });
+            output.textContent = input.value; // Valor inicial
+        }
+        ['in-estaca', 'in-titulo', 'in-missao', 'in-nome', 'in-ala', 'in-email']
+            .forEach(id => ligarInput(id, id.replace('in-', 'out-')));
+
+        // --- Ligar CALENDÁRIOS ---
+        const meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+        function formatarData(valorISO) {
+            if (!valorISO) return "";
+            const [ano, mes, dia] = valorISO.split('-');
+            const dataObj = new Date(Date.UTC(ano, mes - 1, dia)); 
+            return `${dia} ${meses[dataObj.getUTCMonth()]} ${ano}`;
+        }
+        function ligarCalendario(inputId, outputId) {
+            const input = document.getElementById(inputId);
+            const output = document.getElementById(outputId);
+            input.addEventListener('input', (e) => { output.textContent = formatarData(e.target.value); });
+            output.textContent = formatarData(input.value); // Valor inicial
+        }
+        ligarCalendario('in-inicio', 'out-inicio');
+        ligarCalendario('in-termino', 'out-termino');
+
+        // --- Ligar FOTO ---
+        document.getElementById('in-foto').addEventListener('change', (event) => {
+            const fotoOutput = document.getElementById('out-foto-container'); 
+            if (event.target.files && event.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => { fotoOutput.style.backgroundImage = `url(${e.target.result})`; }
+                reader.readAsDataURL(event.target.files[0]);
+            }
+        });
+
+        // --- Ligar MEDIDAS ---
+        const inLargura = document.getElementById('in-largura');
+        const inRatioW = document.getElementById('in-ratio-w');
+        const inRatioH = document.getElementById('in-ratio-h');
+        function atualizarMedidas() {
+            const largura = inLargura.value;
+            const ratioW = inRatioW.value;
+            const ratioH = inRatioH.value;
+            if (largura <= 0 || ratioW <= 0 || ratioH <= 0) { return; }
+            cartao.style.width = `${largura}px`;
+            const ratio = ratioW / ratioH;
+            cartao.style.aspectRatio = ratio;
+            if (ratioH > ratioW) { cartao.classList.add('vertical'); } 
+            else { cartao.classList.remove('vertical'); }
+        }
+        [inLargura, inRatioW, inRatioH].forEach(el => el.addEventListener('input', atualizarMedidas));
+        
+        // --- Ligar Seletor de DESIGN ---
+        const inDesign = document.getElementById('in-design');
+        function atualizarDesign() {
+            const theme = inDesign.value;
+            // MUDANÇA AQUI: Lista de todos os temas para remover
+            cartao.classList.remove('theme-moderno', 'theme-classico', 'theme-minimalista', 'theme-foco-foto', 'theme-celestial');
+            cartao.classList.add(theme);
+        }
+        inDesign.addEventListener('change', atualizarDesign);
+        
+        // --- Ligar Botão IMPRIMIR ---
+        document.getElementById("btnImprimir").addEventListener("click", function() {
+            window.print();
+        });
+
+        // --- Ligar Botão DOWNLOAD ---
+        document.getElementById("btnBaixar").addEventListener("click", function() {
+            const elementoDoCartao = document.getElementById("cartaoParaBaixar");
+            const btnBaixar = this;
+            const btnImprimir = document.getElementById("btnImprimir");
+
+            btnBaixar.textContent = "A descarregar...";
+            btnBaixar.disabled = true;
+            btnImprimir.disabled = true;
+            
+            html2canvas(elementoDoCartao, { 
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff'
+            }).then(canvas => {
+                const linkImagem = canvas.toDataURL("image/png");
+                const linkDownload = document.createElement("a");
+                linkDownload.href = linkImagem;
+                linkDownload.download = "cartao-missionario.png";
+                linkDownload.click();
+                
+                btnBaixar.textContent = "Baixar como PNG";
+                btnBaixar.disabled = false;
+                btnImprimir.disabled = false;
+            });
+        });
+        
+        // --- FUNÇÕES INICIAIS ---
+        atualizarMedidas();
+        atualizarDesign();
+    </script>
+    
+</body>
+</html>
