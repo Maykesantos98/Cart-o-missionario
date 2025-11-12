@@ -187,55 +187,45 @@
         
 
         /* ============================================= */
-        /* CORREÇÃO AQUI: Bloco responsivo adicionado    */
-        /* DENTRO da tag <style> principal               */
+        /* BLOCO RESPONSIVO                              */
         /* ============================================= */
         @media (max-width: 900px) {
             body {
-                /* Empilha os itens verticalmente */
                 flex-direction: column;
-                /* Centraliza-os na tela */
                 align-items: center;
-                /* Reduz o padding em telas pequenas */
                 padding: 10px;
                 gap: 20px;
             }
 
             .editor {
-                /* O editor agora ocupa 100% da largura */
                 width: 100%;
-                /* Remove a largura fixa de 400px */
                 max-width: 100%; 
                 padding: 20px;
-                /* Garante que o padding não aumente a largura total */
                 box-sizing: border-box; 
             }
 
             .card {
-                /* Força o cartão a ter 100% da largura da tela */
                 width: 100% !important; 
                 max-width: 100% !important;
+                
+                /* --- CORREÇÃO ADICIONADA AQUI --- */
+                height: auto !important; /* Força a altura a ser automática */
+                aspect-ratio: auto !important; /* Cancela a proporção do JS */
             }
             
-            /* --- NOVAS REGRAS PARA FONTES E ESPAÇAMENTO --- */
-            
-            /* Reduz o padding para dar mais espaço */
+            /* (As regras para diminuir fontes e padding permanecem) */
             .info-column, .photo-column {
-                padding: 20px; /* Um padding consistente */
+                padding: 20px;
             }
             .card.vertical .info-column {
                 padding-top: 20px;
             }
-            /* Ajuste específico para o tema foco-foto */
              .card.theme-foco-foto .info-column {
                 padding: 20px;
              }
-
-            /* Reduz as fontes principais */
-            .main-name { font-size: 28px !important; } /* !important para garantir */
+            .main-name { font-size: 28px !important; }
             .mission { font-size: 18px !important; margin-bottom: 15px !important; }
             
-            /* Reduz fontes de temas específicos */
             .card.theme-moderno .main-name,
             .card.theme-celestial .main-name { font-size: 28px !important; }
             .card.theme-classico .main-name { font-size: 30px !important; }
@@ -248,16 +238,12 @@
             .card.theme-minimalista .mission { font-size: 16px !important; }
             .card.theme-foco-foto .mission { font-size: 16px !important; }
 
-
-            /* Reduz fontes dos detalhes */
             .details p { font-size: 14px !important; line-height: 1.5 !important; margin: 8px 0 !important; }
             .details { padding-top: 10px !important; margin-top: 10px !important; }
             .footer { padding-top: 10px !important; margin-top: 15px !important; }
             .footer p { font-size: 10px !important; }
-            
             .stake { font-size: 12px !important; }
 
-            /* Ajusta a foto */
             .card.theme-moderno #out-foto-container,
             .card.theme-classico #out-foto-container,
             .card.theme-minimalista #out-foto-container,
