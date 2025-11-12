@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editor de Cartão Missionário</title> <link rel="preconnect" href="https://fonts.googleapis.com">
+    <title>Editor de Cartão Missionário (Responsivo)</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&family=EB+Garamond:wght@400;700&display=swap" rel="stylesheet">
     
@@ -69,18 +71,15 @@
         .campo-medidas span { font-size: 20px; font-weight: 600; color: var(--cor-texto-secundario); padding-top: 15px; }
         .editor input[type="file"] { font-size: 14px; width: 100%; }
 
-        /* --- MUDANÇA CSS --- */
         .botoes-acao { display: flex; gap: 10px; margin-top: 20px; }
-        #btnBaixar { /* Removido #btnImprimir daqui */
+        #btnBaixar {
             flex: 1; padding: 12px; font-size: 16px; font-weight: 600;
             cursor: pointer; border: none; border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         #btnBaixar { color: #ffffff; background-color: var(--cor-azul-vibrante); }
-        /* Removidas regras de #btnImprimir */
         #btnBaixar:hover { background-color: var(--cor-azul-escuro-chamativo); }
-        /* Removidas regras de #btnImprimir:hover */
-        #btnBaixar:disabled { /* Removido #btnImprimir:disabled daqui */
+        #btnBaixar:disabled {
             background-color: #aaa; cursor: wait; 
         }
 
@@ -104,7 +103,7 @@
         .mission::after { display: none; }
         .incentive-message { display: none; }
         
-        /* (TODOS OS 5 TEMAS CSS VÊM AQUI - SEM ALTERAÇÕES) */
+        /* (TODOS OS 5 TEMAS CSS VÊM AQUI - SEM MUDANÇAS) */
         
         /* TEMA 1: MODERNO */
         .card.theme-moderno .photo-column { background-color: var(--cor-fundo-coluna-foto); background-image: linear-gradient(135deg, var(--cor-fundo-coluna-foto) 0%, #d8eaff 100%); border-left: 2px solid var(--cor-borda-suave); }
@@ -186,10 +185,93 @@
         .card.vertical .main-name { font-size: 34px; }
         .card.vertical .mission { font-size: 20px; }
         
-        /* ---------------------------------------------------
-            /* ESTILOS DE IMPRESSÃO (REMOVIDO)
-            ---------------------------------------------------
-        */
+
+        /* ============================================= */
+        /* CORREÇÃO AQUI: Bloco responsivo adicionado    */
+        /* DENTRO da tag <style> principal               */
+        /* ============================================= */
+        @media (max-width: 900px) {
+            body {
+                /* Empilha os itens verticalmente */
+                flex-direction: column;
+                /* Centraliza-os na tela */
+                align-items: center;
+                /* Reduz o padding em telas pequenas */
+                padding: 10px;
+                gap: 20px;
+            }
+
+            .editor {
+                /* O editor agora ocupa 100% da largura */
+                width: 100%;
+                /* Remove a largura fixa de 400px */
+                max-width: 100%; 
+                padding: 20px;
+                /* Garante que o padding não aumente a largura total */
+                box-sizing: border-box; 
+            }
+
+            .card {
+                /* Força o cartão a ter 100% da largura da tela */
+                width: 100% !important; 
+                max-width: 100% !important;
+            }
+            
+            /* --- NOVAS REGRAS PARA FONTES E ESPAÇAMENTO --- */
+            
+            /* Reduz o padding para dar mais espaço */
+            .info-column, .photo-column {
+                padding: 20px; /* Um padding consistente */
+            }
+            .card.vertical .info-column {
+                padding-top: 20px;
+            }
+            /* Ajuste específico para o tema foco-foto */
+             .card.theme-foco-foto .info-column {
+                padding: 20px;
+             }
+
+            /* Reduz as fontes principais */
+            .main-name { font-size: 28px !important; } /* !important para garantir */
+            .mission { font-size: 18px !important; margin-bottom: 15px !important; }
+            
+            /* Reduz fontes de temas específicos */
+            .card.theme-moderno .main-name,
+            .card.theme-celestial .main-name { font-size: 28px !important; }
+            .card.theme-classico .main-name { font-size: 30px !important; }
+            .card.theme-minimalista .main-name { font-size: 26px !important; }
+            .card.theme-foco-foto .main-name { font-size: 24px !important; }
+
+            .card.theme-moderno .mission,
+            .card.theme-celestial .mission { font-size: 18px !important; }
+            .card.theme-classico .mission { font-size: 20px !important; }
+            .card.theme-minimalista .mission { font-size: 16px !important; }
+            .card.theme-foco-foto .mission { font-size: 16px !important; }
+
+
+            /* Reduz fontes dos detalhes */
+            .details p { font-size: 14px !important; line-height: 1.5 !important; margin: 8px 0 !important; }
+            .details { padding-top: 10px !important; margin-top: 10px !important; }
+            .footer { padding-top: 10px !important; margin-top: 15px !important; }
+            .footer p { font-size: 10px !important; }
+            
+            .stake { font-size: 12px !important; }
+
+            /* Ajusta a foto */
+            .card.theme-moderno #out-foto-container,
+            .card.theme-classico #out-foto-container,
+            .card.theme-minimalista #out-foto-container,
+            .card.theme-celestial #out-foto-container {
+                margin-bottom: 15px;
+            }
+            .incentive-message {
+                font-size: 14px !important;
+                line-height: 1.3 !important;
+            }
+            .card.theme-moderno .incentive-message {
+                bottom: 15px;
+            }
+        }
         
     </style>
 </head>
@@ -359,17 +441,13 @@
         }
         inDesign.addEventListener('change', atualizarDesign);
         
-        // --- MUDANÇA JS: Bloco do botão IMPRIMIR removido ---
-
         // --- Ligar Botão DOWNLOAD ---
         document.getElementById("btnBaixar").addEventListener("click", function() {
             const elementoDoCartao = document.getElementById("cartaoParaBaixar");
             const btnBaixar = this;
-            // --- MUDANÇA JS: Removida referência ao btnImprimir ---
 
             btnBaixar.textContent = "A descarregar...";
             btnBaixar.disabled = true;
-            // --- MUDANÇA JS: Removida referência ao btnImprimir.disabled ---
             
             html2canvas(elementoDoCartao, { 
                 scale: 2,
@@ -384,7 +462,6 @@
                 
                 btnBaixar.textContent = "Baixar como PNG";
                 btnBaixar.disabled = false;
-                // --- MUDANÇA JS: Removida referência ao btnImprimir.disabled ---
             });
         });
         
